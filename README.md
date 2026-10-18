@@ -80,12 +80,32 @@ uv run tools/test_cards.py                      # docs/test_cards.pdf
 
 The tests run on real scans of the whole glass of an Epson XP-255 (`tests/data`), made with the
 printed test cards from `docs/test_cards.pdf`, and on the same scans with a simulated shadow;
-scanning goes through a fake `scanimage`. To test with another scanner, print the test cards,
-cut them out and scan the glass at 100 dpi:
-`scanimage --mode Color --resolution 100 --format=png > glass.png`.
-Please never add scans of real cards.
+scanning goes through a fake `scanimage`. Please never add scans of real cards.
 
 Translations: `src/id2pdf/locale/<language>/LC_MESSAGES/id2pdf.po`.
+
+## Help: send scans from your scanner
+
+id2pdf has been tuned on one scanner so far. Scanners differ in the colour of the lid, its
+shading, the shadows along the glass and how much a card lifts the lid, so scans from other
+models help most. No real card is needed, and none should ever be sent:
+
+1. Print [docs/test_cards.pdf](docs/test_cards.pdf) at 100 % (no "fit to page"; the line at the
+   top must be exactly 100 mm) and cut out both cards, on thick paper or card if you have it.
+2. Scan the whole glass three times at 100 dpi, with the lid closed:
+
+   ```
+   scanimage --mode Color --resolution 100 --format=png > empty.png       # nothing on the glass
+   scanimage --mode Color --resolution 100 --format=png > card.png        # card A anywhere, a little askew
+   scanimage --mode Color --resolution 100 --format=png > two_cards.png   # cards A and B, apart
+   ```
+
+3. Optionally, with your real card on the glass, run `id2pdf --diagnose` and copy only the text
+   it prints: sizes and positions, nothing from the card. Do not send the scan it saves.
+4. Open an issue with the three images, the text from step 3, the scanner's line from
+   `scanimage -L` (model and SANE backend) and whether id2pdf found your card.
+
+If id2pdf does not find a card or cuts it wrongly, the same three scans are the best bug report.
 
 ## Licence
 

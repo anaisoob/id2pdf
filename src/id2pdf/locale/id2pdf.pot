@@ -1,0 +1,192 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the id2pdf package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: id2pdf\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-18 19:52+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/id2pdf/cli.py:18
+msgid ""
+"Scan both sides of an ID card onto one A4 page, as a PDF. The card may lie "
+"anywhere on the scanner glass; it is found, straightened and cut out."
+msgstr ""
+
+#: src/id2pdf/cli.py:22
+msgid "the PDF to write (with --diagnose: a folder for the scan)"
+msgstr ""
+
+#: src/id2pdf/cli.py:29
+msgid "use existing scans or photos of the two sides instead of scanning"
+msgstr ""
+
+#: src/id2pdf/cli.py:31
+msgid "scan N plain A4 pages instead of a card"
+msgstr ""
+
+#: src/id2pdf/cli.py:33
+msgid "scan the glass and print what is found (numbers only)"
+msgstr ""
+
+#: src/id2pdf/cli.py:35
+msgid "SANE device (default: the first scanner in 'scanimage -L')"
+msgstr ""
+
+#: src/id2pdf/cli.py:36
+msgid "overwrite the output without asking"
+msgstr ""
+
+#: src/id2pdf/cli.py:44
+msgid "the output PDF is required"
+msgstr ""
+
+#: src/id2pdf/cli.py:46
+#, python-brace-format
+msgid "{path} already exists. Overwrite? [y/N] "
+msgstr ""
+
+#: src/id2pdf/cli.py:47
+msgid "y"
+msgstr ""
+
+#: src/id2pdf/cli.py:48
+msgid "Nothing was changed."
+msgstr ""
+
+#: src/id2pdf/cli.py:55
+#, python-brace-format
+msgid "Scanner: {device}"
+msgstr ""
+
+#: src/id2pdf/cli.py:66
+msgid "Cancelled, nothing was saved."
+msgstr ""
+
+#: src/id2pdf/cli.py:67
+#, python-brace-format
+msgid "Saved: {path}"
+msgstr ""
+
+#: src/id2pdf/scanner.py:34
+msgid "The scanimage command is missing (package sane)."
+msgstr ""
+
+#: src/id2pdf/scanner.py:36
+msgid "'scanimage -L' failed:"
+msgstr ""
+
+#: src/id2pdf/scanner.py:40
+msgid "No scanner found. Check 'scanimage -L'."
+msgstr ""
+
+#: src/id2pdf/scanner.py:57
+msgid "The scanner is still busy, trying again..."
+msgstr ""
+
+#: src/id2pdf/scanner.py:60
+msgid "Scanning failed:"
+msgstr ""
+
+#: src/id2pdf/scanner.py:65
+msgid "Then press Enter (Ctrl+C to cancel) "
+msgstr ""
+
+#: src/id2pdf/scanner.py:71
+msgid ""
+"Put the card on the glass front side down, anywhere (text upright), and "
+"close the lid."
+msgstr ""
+
+#: src/id2pdf/scanner.py:73
+msgid ""
+"Put the card on the glass back side down, anywhere (text upright), and close "
+"the lid."
+msgstr ""
+
+#: src/id2pdf/scanner.py:75
+msgid "Looking for the card on the glass..."
+msgstr ""
+
+#: src/id2pdf/scanner.py:80
+msgid ""
+"No card found. Put it away from the edge of the glass, flat, and close the "
+"lid."
+msgstr ""
+
+#: src/id2pdf/scanner.py:82
+msgid "There is more than one card on the glass, taking the largest."
+msgstr ""
+
+#: src/id2pdf/scanner.py:91
+msgid "Scanning the card..."
+msgstr ""
+
+#: src/id2pdf/scanner.py:118
+#, python-brace-format
+msgid "Put page {n} of {pages} face down on the glass and close the lid."
+msgstr ""
+
+#: src/id2pdf/scanner.py:119
+msgid "Scanning..."
+msgstr ""
+
+#: src/id2pdf/scanner.py:126
+msgid "Put the card on the glass as usual and close the lid."
+msgstr ""
+
+#: src/id2pdf/scanner.py:131
+#, python-brace-format
+msgid "Glass: {width:.1f} x {height:.1f} mm, lid (median grey): {lid:.0f}"
+msgstr ""
+
+#: src/id2pdf/scanner.py:136
+#, python-brace-format
+msgid "Objects found: {count} (largest first; a card is 85.6 x 54 mm)"
+msgstr ""
+
+#: src/id2pdf/scanner.py:137
+msgid "shape"
+msgstr ""
+
+#: src/id2pdf/scanner.py:137
+msgid "size"
+msgstr ""
+
+#: src/id2pdf/scanner.py:137
+msgid "too small"
+msgstr ""
+
+#: src/id2pdf/scanner.py:142
+#, python-brace-format
+msgid "rejected ({reason})"
+msgstr ""
+
+#: src/id2pdf/scanner.py:146
+#, python-brace-format
+msgid "CARD, without its shadow: {size} mm"
+msgstr ""
+
+#: src/id2pdf/scanner.py:150
+#, python-brace-format
+msgid ""
+"{long:6.1f} x {short:5.1f} mm  ratio {ratio:4.2f}  centre ({where}) mm  "
+"angle {angle:5.1f}  {verdict}"
+msgstr ""
+
+#: src/id2pdf/scanner.py:157
+#, python-brace-format
+msgid ""
+"The scan is saved only on this computer: {path} (it shows the card, do not "
+"share it)."
+msgstr ""

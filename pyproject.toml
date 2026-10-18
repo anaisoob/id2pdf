@@ -1,0 +1,51 @@
+[project]
+name = "id2pdf"
+version = "0.1.0"
+description = "Scan both sides of an ID card onto one A4 page as a PDF; the card may lie anywhere on the scanner glass"
+authors = [{ name = "anaisoob", email = "anaisoob@tutamail.com" }]
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+keywords = ["scanner", "sane", "id card", "pdf", "photocopy"]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Graphics :: Capture :: Scanners",
+]
+dependencies = [
+    "numpy>=2",
+    "opencv-python-headless>=4.8",
+    "pillow>=10",
+]
+
+[project.scripts]
+id2pdf = "id2pdf.cli:main"
+
+[dependency-groups]
+dev = [
+    "pymupdf>=1.24",
+    "pymupdf-fonts>=1.0",
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/id2pdf"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "tools", "docs", "README.md", "CHANGELOG.md", "LICENSE"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -13,7 +13,7 @@ DARKER = 15  # grey levels below the lid that count as part of a card (the lid's
 GLASS_EDGE_MM = 2  # strip along the edges of the glass ignored when looking for the card
 
 # Photos and images of unknown resolution. The numbers were tuned on the photos of ID cards in
-# MIDV-2020 (tools/evaluate_midv.py), where seven in ten cards are found and about 1 % wrongly.
+# MIDV-2020 (tools/evaluate_midv.py), where seven in ten cards are found and under 1 % wrongly.
 PHOTO_WIDTH = 800  # the photo is searched at this size
 PHOTO_LINES = 40  # straight lines tried as the card's sides
 PHOTO_SHORTLIST = 60  # outlines whose colours are compared, the best placed on edges first
@@ -21,6 +21,7 @@ PHOTO_SHORTLIST = 60  # outlines whose colours are compared, the best placed on 
 # while a wrong cut-out may pass unnoticed.
 PHOTO_MIN_SCORE = 20  # below this, the best outline is doubtful
 PHOTO_MARGIN = 1.6  # and also unless it scores this much more than any other place in the photo
+PHOTO_ENDS = 0.2  # and unless all its sides but one reach their corners on edges at least this much
 PHOTO_PRINT = 0.10  # share of fine edges inside a card from which it counts as fully printed
 LENS = 0.8  # a phone camera's focal length, in widths of the photo
 
@@ -269,6 +270,20 @@ def _at(image: np.ndarray, points: np.ndarray) -> np.ndarray:
     return image[ys, xs]
 
 
+def _ends(quad: np.ndarray, near: np.ndarray) -> float:
+    """How well the second weakest of the sides' eight ends lies on edges.
+
+    A side's line runs on past the card, so an outline made partly of the card and partly of
+    something else has corners where nothing ends. One end may be hidden under a finger.
+    """
+    ends = []
+    for p, q in zip(quad, np.roll(quad, -1, 0), strict=True):
+        for start, end in ((0.06, 0.18), (0.82, 0.94)):  # past the rounded corner
+            t = np.linspace(start, end, max(4, int(np.linalg.norm(q - p) * (end - start) / 2)))[:, None]
+            ends.append(_at(near, p + (q - p) * t).mean())
+    return sorted(ends)[1]
+
+
 def _overlap(a: np.ndarray, b: np.ndarray) -> float:
     """Intersection over union of two convex quadrilaterals."""
     common, _ = cv2.intersectConvexConvex(a, b)
@@ -300,7 +315,8 @@ def find_card_corners(image: Image.Image) -> np.ndarray | None:
     side lies on an edge and separates clearly different colours wins; a card is full of fine
     print, a wall or a door seen through the same lines is not. A light, even image
     (a scan) whose card is not found that way is searched like a scan. None if there is no card,
-    or the best candidate is doubtful: a low score, or another place in the photo nearly as good.
+    or the best candidate is doubtful: a low score, another place in the photo nearly as good, or
+    corners where no edges end.
     Corners clockwise from the card's top left.
     """
     scale = PHOTO_WIDTH / max(image.size)
@@ -341,7 +357,7 @@ def find_card_corners(image: Image.Image) -> np.ndarray | None:
         # A rival also when it lies inside: a card held up before a door can make a larger
         # outline around itself, which looks just like a card around its own photo.
         rival = next((other for other, quad in scored[1:] if _overlap(best, quad) < 0.5), 0.0)
-        if score >= PHOTO_MARGIN * rival:
+        if score >= PHOTO_MARGIN * rival and _ends(best, near) > PHOTO_ENDS:
             return _in_order(best / scale, image.size)
     if _looks_scanned(image):
         cards = find_cards(image, None)

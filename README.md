@@ -55,6 +55,26 @@ Messages are in English or Croatian, following `LANGUAGE` / `LANG`.
 If a card is not found, `--diagnose` prints the size and position of every object on the glass
 and why it was not taken for a card; the scan itself is saved only locally.
 
+### In photos
+
+With `--images`, the card can also be photographed with a phone, at a slant and on any
+background:
+
+- The card's sides are looked for as straight lines through the photo's edges. A line made of
+  one long piece counts more than one made of many short pieces, as rows of text are.
+- Of the quadrilaterals four such lines make, those with a card's proportions are kept. Seen
+  at a slant, a card looks longer or shorter than it is; its real proportions are worked out
+  for the lens of a typical phone camera.
+- The winner lies on edges all round and separates clearly different colours on every side.
+  If even the winner is doubtful, no card is reported rather than a wrong one, and the whole
+  image is used. A scan saved as a file is searched like a scan when this finds nothing.
+- The card is then straightened to its real proportions, its rounded corners painted white.
+
+On the ID-card photos of [MIDV-2020](https://arxiv.org/abs/2107.00396), a public dataset of mock
+identity documents, 74 % of the cards are found and 5 % wrongly; on a table, in low light or
+with highlights nearly all, on a printed page full of text hardly any. Scans saved as files
+are found 97 % of the time. `tools/evaluate_midv.py` measures this.
+
 ## Use as a library
 
 ```python
@@ -76,11 +96,13 @@ uv run pytest
 uv run ruff check . && uv run ruff format --check .
 ./tools/update_translations.sh                  # after changing messages; needs gettext
 uv run tools/test_cards.py                      # docs/test_cards.pdf
+uv run tools/evaluate_midv.py FOLDER photo      # card detection on MIDV-2020; see the script
 ```
 
 The tests run on real scans of the whole glass of an Epson XP-255 (`tests/data`), made with the
 printed test cards from `docs/test_cards.pdf`, and on the same scans with a simulated shadow;
-scanning goes through a fake `scanimage`. Please never add scans of real cards.
+scanning goes through a fake `scanimage`. The photos are of mock documents from MIDV-2020
+(`tests/data/README.md`). Please never add scans or photos of real cards.
 
 Translations: `src/id2pdf/locale/<language>/LC_MESSAGES/id2pdf.po`.
 

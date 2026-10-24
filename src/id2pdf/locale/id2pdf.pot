@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: id2pdf\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 19:52+0200\n"
+"POT-Creation-Date: 2026-10-24 20:59+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,16 +64,21 @@ msgstr ""
 msgid "Nothing was changed."
 msgstr ""
 
-#: src/id2pdf/cli.py:55
+#: src/id2pdf/cli.py:56
+#, python-brace-format
+msgid "No card found in {path}, the whole image is used."
+msgstr ""
+
+#: src/id2pdf/cli.py:61
 #, python-brace-format
 msgid "Scanner: {device}"
 msgstr ""
 
-#: src/id2pdf/cli.py:66
+#: src/id2pdf/cli.py:72
 msgid "Cancelled, nothing was saved."
 msgstr ""
 
-#: src/id2pdf/cli.py:67
+#: src/id2pdf/cli.py:73
 #, python-brace-format
 msgid "Saved: {path}"
 msgstr ""

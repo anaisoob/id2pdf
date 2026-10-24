@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .detect import card_from_image
+from .detect import find_card_corners, straighten
 from .i18n import _
 from .layout import CARD_DPI, id_card_page, open_image, save_pdf
 from .scanner import ScanError, diagnose, find_scanner, scan_id_card, scan_pages
@@ -48,7 +48,13 @@ def main(argv: list[str] | None = None) -> None:
             sys.exit(_("Nothing was changed."))
     try:
         if args.images:
-            sides = [card_from_image(open_image(path)) for path in args.images]
+            sides = []
+            for path in args.images:
+                image = open_image(path)
+                corners = find_card_corners(image)
+                if corners is None:
+                    print(_("No card found in {path}, the whole image is used.").format(path=path))
+                sides.append(image if corners is None else straighten(image, corners))
             save_pdf([id_card_page(*sides)], args.output, CARD_DPI)
         else:
             device = args.device or find_scanner()

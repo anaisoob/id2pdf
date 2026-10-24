@@ -2,7 +2,8 @@
 
 tests/data holds real 100 dpi scans of the whole glass of an Epson XP-255, made with the
 printed test cards (docs/test_cards.pdf): empty.png, card.png (card A, turned about 7°)
-and two_cards.png (A, and the very pale B upside down).
+and two_cards.png (A, and the very pale B upside down). The photo_*.jpg come from MIDV-2020;
+see tests/data/README.md.
 """
 
 import io

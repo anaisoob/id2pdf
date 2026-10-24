@@ -50,6 +50,14 @@ def test_existing_images_need_no_scanner(tmp_path):
     assert pdf_pages_mm(tmp_path / "id.pdf") == [(210, 297)]
 
 
+def test_an_image_without_a_card_is_reported(tmp_path, capsys):
+    photos = [str(DATA / "photo_table.jpg"), str(DATA / "photo_no_card.jpg")]
+    cli.main([str(tmp_path / "id.pdf"), "--images", *photos])
+    out = capsys.readouterr().out
+    assert "No card found in" in out and "photo_no_card.jpg" in out and "photo_table.jpg" not in out
+    assert (tmp_path / "id.pdf").exists()
+
+
 def test_diagnose_prints_what_it_found(tmp_path, fake_scanner, capsys):
     fake_scanner(with_shadow(sample("card.png"), 70, 11))
     cli.main(["--diagnose", str(tmp_path / "diag")])

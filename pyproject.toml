@@ -1,6 +1,6 @@
 [project]
 name = "id2pdf"
-version = "0.1.0"
+version = "0.2.0"
 description = "Scan both sides of an ID card onto one A4 page as a PDF; the card may lie anywhere on the scanner glass"
 authors = [{ name = "anaisoob", email = "anaisoob@tutamail.com" }]
 readme = "README.md"

@@ -1,4 +1,6 @@
-"""Finding ID-1 cards (85.6 x 54 mm: ID cards, driving licences, ...) on scans."""
+"""Finding ID-1 cards (85.6 x 54 mm: ID cards, driving licences, ...) on scans and photos."""
+
+import itertools
 
 import cv2
 import numpy as np
@@ -9,6 +11,14 @@ CARD_CORNER_MM = 3.18
 PREVIEW_DPI = 100  # quick scan of the whole glass to find the card
 DARKER = 15  # grey levels below the lid that count as part of a card (the lid's shading is less)
 GLASS_EDGE_MM = 2  # strip along the edges of the glass ignored when looking for the card
+
+# Photos and images of unknown resolution. The numbers were tuned on the photos of ID cards in
+# MIDV-2020 (tools/evaluate_midv.py), where three quarters of the cards are found.
+PHOTO_WIDTH = 800  # the photo is searched at this size
+PHOTO_LINES = 40  # straight lines tried as the card's sides
+PHOTO_SHORTLIST = 60  # outlines whose colours are compared, the best placed on edges first
+PHOTO_MIN_SCORE = 15  # below this, a wrong card is more likely than a right one
+LENS = 0.8  # a phone camera's focal length, in widths of the photo
 
 Rect = tuple[tuple[float, float], tuple[float, float], float]  # cv2.minAreaRect: centre, size, angle
 
@@ -144,6 +154,204 @@ def find_cards(image: Image.Image, dpi: float | None, glass: bool = False) -> li
     return [fit_card(gray, blob, dpi) for blob in blobs]
 
 
+def _edges(small: np.ndarray) -> np.ndarray:
+    """The clearer edges of a photo: in any colour channel, and among the strongest in the photo."""
+    blur = cv2.GaussianBlur(small, (0, 0), 2)
+    lab = cv2.cvtColor(blur, cv2.COLOR_RGB2LAB)
+    channels = cv2.split(lab)
+    gx = sum(np.abs(cv2.Sobel(c, cv2.CV_32F, 1, 0)) for c in channels)
+    gy = sum(np.abs(cv2.Sobel(c, cv2.CV_32F, 0, 1)) for c in channels)
+    strength = np.hypot(gx, gy)
+    edges = np.zeros(blur.shape[:2], np.uint8)
+    for c in channels:
+        edges |= cv2.Canny(c, 20, 50)
+    edges[strength < 0.5 * np.percentile(strength, 92)] = 0
+    return edges
+
+
+def _lines(edges: np.ndarray) -> list[tuple[float, float]]:
+    """Straight lines (normal angle, distance from the origin) through the edges.
+
+    Longest unbroken piece first: a row of text makes a long line of short pieces, a card's
+    side one long piece.
+    """
+    segments = cv2.HoughLinesP(edges, 1, np.pi / 360, threshold=30, minLineLength=30, maxLineGap=4)
+    if segments is None:
+        return []
+    found = []  # [angle, distance, longest piece]
+    for x1, y1, x2, y2 in segments.reshape(-1, 4).astype(float):
+        angle = np.arctan2(x2 - x1, -(y2 - y1)) % np.pi
+        distance = x1 * np.cos(angle) + y1 * np.sin(angle)
+        length = np.hypot(x2 - x1, y2 - y1)
+        for line in found:
+            if abs(line[0] - angle) < np.deg2rad(2.5) and abs(line[1] - distance) < 6:
+                line[2] = max(line[2], length)
+                break
+        else:
+            found.append([angle, distance, length])
+    found.sort(key=lambda line: -line[2])
+    return [(angle, distance) for angle, distance, _ in found[:PHOTO_LINES]]
+
+
+def _crossing(a: tuple[float, float], b: tuple[float, float]) -> np.ndarray | None:
+    m = np.array([[np.cos(a[0]), np.sin(a[0])], [np.cos(b[0]), np.sin(b[0])]])
+    if abs(np.linalg.det(m)) < 1e-6:
+        return None
+    return np.linalg.solve(m, [a[1], b[1]])
+
+
+def _turn(a: float, b: float) -> float:
+    """The angle between two lines' directions, 0 to 90 degrees, in radians."""
+    d = abs(a - b) % np.pi
+    return min(d, np.pi - d)
+
+
+def _ratio(quad: np.ndarray, size: tuple[int, int]) -> float:
+    """Width / height (first side / second side) of the rectangle a photo shows as quad.
+
+    Perspective makes a card seen at a slant look longer or shorter than it is. With the focal
+    length of a typical phone camera assumed, Zhang & He, "Whiteboard scanning and image
+    enhancement" (2007), gives the real ratio back.
+    """
+    w, h = size
+    f = LENS * max(w, h)
+    m1, m2, m4, m3 = np.hstack([quad - (w / 2, h / 2), np.ones((4, 1))])  # corners in order round
+    k2 = np.dot(np.cross(m1, m4), m3) / np.dot(np.cross(m2, m4), m3)
+    k3 = np.dot(np.cross(m1, m4), m2) / np.dot(np.cross(m3, m4), m2)
+    n2, n3 = k2 * m2 - m1, k3 * m3 - m1
+    width, height = ((n[0] ** 2 + n[1] ** 2) / f**2 + n[2] ** 2 for n in (n2, n3))
+    return float(np.sqrt(width / height)) if width > 0 and height > 0 else 0.0
+
+
+def _outlines(lines: list[tuple[float, float]], size: tuple[int, int]):
+    """Every quadrilateral of four lines that could be a card seen by a camera."""
+    w, h = size
+    pairs = [(a, b) for a, b in itertools.combinations(lines, 2) if _turn(a[0], b[0]) < np.deg2rad(30)]
+    for (a, b), (c, d) in itertools.combinations(pairs, 2):
+        if _turn(a[0], c[0]) < np.deg2rad(45):
+            continue
+        corners = [_crossing(a, c), _crossing(c, b), _crossing(b, d), _crossing(d, a)]
+        if any(corner is None for corner in corners):
+            continue
+        quad = np.array(corners, np.float32)
+        if not ((-0.02 * w <= quad[:, 0]) & (quad[:, 0] <= 1.02 * w)).all():
+            continue
+        if not ((-0.02 * h <= quad[:, 1]) & (quad[:, 1] <= 1.02 * h)).all():
+            continue
+        if len(cv2.convexHull(quad)) != 4 or cv2.contourArea(quad) < 0.02 * w * h:
+            continue
+        ratio = _ratio(quad, size)
+        ratio = max(ratio, 1 / ratio) if ratio else 0.0
+        if 1.3 < ratio < 2.0:
+            yield quad, ratio
+
+
+def _sides(quad: np.ndarray, step: float):
+    """Points along each side, without its ends, and the side's normal pointing inside."""
+    centre = quad.mean(0)
+    for p, q in zip(quad, np.roll(quad, -1, 0), strict=True):
+        along = (q - p) / np.linalg.norm(q - p)
+        normal = np.array([-along[1], along[0]])
+        if np.dot(centre - (p + q) / 2, normal) < 0:
+            normal = -normal
+        t = np.linspace(0.1, 0.9, max(4, int(np.linalg.norm(q - p) / step)))[:, None]
+        yield p + (q - p) * t, normal
+
+
+def _at(image: np.ndarray, points: np.ndarray) -> np.ndarray:
+    h, w = image.shape[:2]
+    xs = np.clip(np.rint(points[:, 0]).astype(int), 0, w - 1)
+    ys = np.clip(np.rint(points[:, 1]).astype(int), 0, h - 1)
+    return image[ys, xs]
+
+
+def _looks_scanned(image: Image.Image) -> bool:
+    """A light, even border, as a scanner's lid gives and a photo seldom does."""
+    gray = np.array(image.convert("L"))
+    border = np.concatenate([gray[:20].ravel(), gray[-20:].ravel(), gray[:, :20].ravel(), gray[:, -20:].ravel()])
+    return np.median(border) > 200 and np.percentile(border, 90) - np.percentile(border, 10) < 25
+
+
+def _in_order(quad: np.ndarray, size: tuple[int, int]) -> np.ndarray:
+    """The corners clockwise from the card's top left, its long side the one nearest to level."""
+    centre = quad.mean(0)
+    quad = quad[np.argsort(np.arctan2(quad[:, 1] - centre[1], quad[:, 0] - centre[0]))]
+    if _ratio(quad, size) < 1:  # the first side is a short one
+        quad = np.roll(quad, -1, 0)
+    top = quad[1] - quad[0]
+    return quad if top[0] >= 0 else np.roll(quad, -2, 0)
+
+
+def find_card_corners(image: Image.Image) -> np.ndarray | None:
+    """The four corners of the card in a photo, or in a scan of unknown resolution.
+
+    The card can lie at a slant to the camera. Its sides are straight lines through the photo's
+    edges; of all the quadrilaterals they make that have a card's shape, the one whose every
+    side lies on an edge and separates clearly different colours wins. A light, even image
+    (a scan) whose card is not found that way is searched like a scan. None if there is no card,
+    or the best candidate is too doubtful. Corners clockwise from the card's top left.
+    """
+    scale = PHOTO_WIDTH / max(image.size)
+    small = np.array(image.convert("RGB").resize((round(image.width * scale), round(image.height * scale))))
+    size = (small.shape[1], small.shape[0])
+    edges = _edges(small)
+    near = cv2.distanceTransform(255 - edges, cv2.DIST_L2, 3) <= 2
+    lab = cv2.cvtColor(cv2.GaussianBlur(small, (0, 0), 2.5), cv2.COLOR_RGB2LAB).astype(np.float32)
+    # Placing the outline on edges is cheap, comparing the colours on both sides of it is not.
+    candidates = []
+    for quad, ratio in _outlines(_lines(edges), size):
+        on_edges = min(_at(near, points).mean() for points, _ in _sides(quad, 3))
+        candidates.append((on_edges, quad, ratio))
+    candidates.sort(key=lambda c: -c[0])
+    best, best_score = None, PHOTO_MIN_SCORE
+    offset = 0.012 * max(size)
+    for on_edges, quad, ratio in candidates[:PHOTO_SHORTLIST]:
+        contrast = min(
+            np.median(np.linalg.norm(_at(lab, points + normal * offset) - _at(lab, points - normal * offset), axis=1))
+            for points, normal in _sides(quad, 4)
+        )
+        area = cv2.contourArea(quad) / (size[0] * size[1])
+        score = (
+            contrast
+            * (0.5 + on_edges)
+            * area**0.25
+            * np.exp(-((np.log(ratio / (CARD_MM[0] / CARD_MM[1])) / 0.15) ** 2))
+        )
+        if score >= best_score:
+            best, best_score = quad, score
+    if best is not None:
+        return _in_order(best / scale, image.size)
+    if _looks_scanned(image):
+        cards = find_cards(image, None)
+        if cards:
+            return _in_order(cv2.boxPoints(cards[0]), image.size)
+    return None
+
+
+def _white_corners(card: Image.Image) -> Image.Image:
+    """The card with white at its rounded corners, where the background showed."""
+    outline = Image.new("L", card.size, 0)
+    radius = round(CARD_CORNER_MM / CARD_MM[1] * card.height)
+    ImageDraw.Draw(outline).rounded_rectangle((0, 0, card.width - 1, card.height - 1), radius=radius, fill=255)
+    return Image.composite(card, Image.new("RGB", card.size, "white"), outline)
+
+
+def straighten(image: Image.Image, corners: np.ndarray) -> Image.Image:
+    """The card inside corners (from find_card_corners) seen straight on, at a card's proportions."""
+    sides = np.linalg.norm(corners - np.roll(corners, -1, 0), axis=1)
+    width = round(max(sides[0], sides[2]))
+    height = round(width * CARD_MM[1] / CARD_MM[0])
+    target = np.float32([[0, 0], [width, 0], [width, height], [0, height]])
+    card = cv2.warpPerspective(
+        np.array(image.convert("RGB")),
+        cv2.getPerspectiveTransform(np.float32(corners), target),
+        (width, height),
+        flags=cv2.INTER_CUBIC,
+        borderValue=(255, 255, 255),
+    )
+    return _white_corners(Image.fromarray(card))
+
+
 def cut_out(image: Image.Image, rect: Rect) -> Image.Image:
     """The card straightened (long side horizontal), with white at its rounded corners."""
     (cx, cy), (w, h), angle = rect
@@ -160,14 +368,16 @@ def cut_out(image: Image.Image, rect: Rect) -> Image.Image:
         flags=cv2.INTER_CUBIC,
         borderValue=(255, 255, 255),
     )
-    card = Image.fromarray(card)
-    outline = Image.new("L", card.size, 0)
-    radius = round(CARD_CORNER_MM / CARD_MM[1] * card.height)
-    ImageDraw.Draw(outline).rounded_rectangle((0, 0, card.width - 1, card.height - 1), radius=radius, fill=255)
-    return Image.composite(card, Image.new("RGB", card.size, "white"), outline)
+    return _white_corners(Image.fromarray(card))
 
 
 def card_from_image(image: Image.Image, dpi: float | None = None) -> Image.Image:
-    """The card cut out of a scan or photo, or the image as it is if no card is found."""
+    """The card cut out of a scan or photo, or the image as it is if no card is found.
+
+    Without dpi the image may be a photo, the card seen at a slant.
+    """
+    if dpi is None:
+        corners = find_card_corners(image)
+        return straighten(image, corners) if corners is not None else image
     cards = find_cards(image, dpi)
     return cut_out(image, cards[0]) if cards else image

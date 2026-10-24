@@ -18,6 +18,7 @@ PHOTO_WIDTH = 800  # the photo is searched at this size
 PHOTO_LINES = 40  # straight lines tried as the card's sides
 PHOTO_SHORTLIST = 60  # outlines whose colours are compared, the best placed on edges first
 PHOTO_MIN_SCORE = 15  # below this, a wrong card is more likely than a right one
+PHOTO_PRINT = 0.10  # share of fine edges inside a card from which it counts as fully printed
 LENS = 0.8  # a phone camera's focal length, in widths of the photo
 
 Rect = tuple[tuple[float, float], tuple[float, float], float]  # cv2.minAreaRect: centre, size, angle
@@ -287,7 +288,8 @@ def find_card_corners(image: Image.Image) -> np.ndarray | None:
 
     The card can lie at a slant to the camera. Its sides are straight lines through the photo's
     edges; of all the quadrilaterals they make that have a card's shape, the one whose every
-    side lies on an edge and separates clearly different colours wins. A light, even image
+    side lies on an edge and separates clearly different colours wins; a card is full of fine
+    print, a wall or a door seen through the same lines is not. A light, even image
     (a scan) whose card is not found that way is searched like a scan. None if there is no card,
     or the best candidate is too doubtful. Corners clockwise from the card's top left.
     """
@@ -296,6 +298,7 @@ def find_card_corners(image: Image.Image) -> np.ndarray | None:
     size = (small.shape[1], small.shape[0])
     edges = _edges(small)
     near = cv2.distanceTransform(255 - edges, cv2.DIST_L2, 3) <= 2
+    fine = cv2.Canny(cv2.cvtColor(small, cv2.COLOR_RGB2GRAY), 50, 150) > 0
     lab = cv2.cvtColor(cv2.GaussianBlur(small, (0, 0), 2.5), cv2.COLOR_RGB2LAB).astype(np.float32)
     # Placing the outline on edges is cheap, comparing the colours on both sides of it is not.
     candidates = []
@@ -310,10 +313,14 @@ def find_card_corners(image: Image.Image) -> np.ndarray | None:
             np.median(np.linalg.norm(_at(lab, points + normal * offset) - _at(lab, points - normal * offset), axis=1))
             for points, normal in _sides(quad, 4)
         )
+        inside = np.zeros(fine.shape, np.uint8)
+        cv2.fillPoly(inside, [np.int32(quad.mean(0) + (quad - quad.mean(0)) * 0.85)], 1)
+        printed = min(1.0, fine[inside > 0].mean() / PHOTO_PRINT)
         area = cv2.contourArea(quad) / (size[0] * size[1])
         score = (
             contrast
             * (0.5 + on_edges)
+            * printed
             * area**0.25
             * np.exp(-((np.log(ratio / (CARD_MM[0] / CARD_MM[1])) / 0.15) ** 2))
         )

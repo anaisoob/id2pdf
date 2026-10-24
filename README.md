@@ -65,13 +65,14 @@ background:
 - Of the quadrilaterals four such lines make, those with a card's proportions are kept. Seen
   at a slant, a card looks longer or shorter than it is; its real proportions are worked out
   for the lens of a typical phone camera.
-- The winner lies on edges all round and separates clearly different colours on every side.
+- The winner lies on edges all round, separates clearly different colours on every side and
+  is full of fine print, as a card is and a wall or a door seen through the same lines is not.
   If even the winner is doubtful, no card is reported rather than a wrong one, and the whole
   image is used. A scan saved as a file is searched like a scan when this finds nothing.
 - The card is then straightened to its real proportions, its rounded corners painted white.
 
 On the ID-card photos of [MIDV-2020](https://arxiv.org/abs/2107.00396), a public dataset of mock
-identity documents, 74 % of the cards are found and 5 % wrongly; on a table, in low light or
+identity documents, 75 % of the cards are found and 4 % wrongly; on a table, in low light or
 with highlights nearly all, on a printed page full of text hardly any. Scans saved as files
 are found 97 % of the time. `tools/evaluate_midv.py` measures this.
 

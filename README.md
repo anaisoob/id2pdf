@@ -99,6 +99,7 @@ uv run ruff check . && uv run ruff format --check .
 ./tools/update_translations.sh                  # after changing messages; needs gettext
 uv run tools/test_cards.py                      # docs/test_cards.pdf
 uv run tools/evaluate_midv.py FOLDER photo      # card detection on MIDV-2020; see the script
+uv run tools/cut_out_cards.py FOLDER            # every image's card into FOLDER/id2pdf
 ```
 
 The tests run on real scans of the whole glass of an Epson XP-255 (`tests/data`), made with the

@@ -20,6 +20,11 @@ dependencies = [
     "pillow>=10",
 ]
 
+[project.urls]
+Homepage = "https://github.com/anaisoob/id2pdf"
+Changelog = "https://github.com/anaisoob/id2pdf/blob/main/CHANGELOG.md"
+Issues = "https://github.com/anaisoob/id2pdf/issues"
+
 [project.scripts]
 id2pdf = "id2pdf.cli:main"
 

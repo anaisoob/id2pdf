@@ -1,0 +1,25 @@
+# Publishes to PyPI when a version tag (v0.1.0, …) is pushed, using trusted publishing:
+# PyPI trusts this workflow in this repository, so no token is stored anywhere.
+name: Publish
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Tag matches the version in pyproject.toml
+        run: test "${GITHUB_REF_NAME#v}" = "$(uv version --short)"
+      - run: uv sync --locked
+      - run: uv run ruff check . && uv run ruff format --check .
+      - run: uv run pytest
+      - run: uv build
+      - run: uv publish

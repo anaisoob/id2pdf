@@ -8,7 +8,7 @@ Then the same for the back.
 
 | On the glass | The PDF |
 |---|---|
-| ![A test card lying askew on the scanner glass](docs/example_glass.png) | ![Both sides straightened on one A4 page](docs/example_result.png) |
+| ![A test card lying askew on the scanner glass](https://raw.githubusercontent.com/anaisoob/id2pdf/main/docs/example_glass.png) | ![Both sides straightened on one A4 page](https://raw.githubusercontent.com/anaisoob/id2pdf/main/docs/example_result.png) |
 
 It works with any card of ID-1 size (85.6 × 54 mm): ID cards, driving licences, health
 insurance cards, residence permits. Everything happens on your computer.
@@ -64,7 +64,7 @@ import id2pdf
 
 id2pdf.set_language("hr")
 device = id2pdf.find_scanner()
-page = id2pdf.scan_id_card(device)              # a PIL image of the A4 page
+page = id2pdf.scan_id_card(device)  # a PIL image of the A4 page
 id2pdf.save_pdf([page], Path("id.pdf"), id2pdf.CARD_DPI)
 ```
 
@@ -90,8 +90,9 @@ id2pdf has been tuned on one scanner so far. Scanners differ in the colour of th
 shading, the shadows along the glass and how much a card lifts the lid, so scans from other
 models help most. No real card is needed, and none should ever be sent:
 
-1. Print [docs/test_cards.pdf](docs/test_cards.pdf) at 100 % (no "fit to page"; the line at the
-   top must be exactly 100 mm) and cut out both cards, on thick paper or card if you have it.
+1. Print [docs/test_cards.pdf](https://github.com/anaisoob/id2pdf/blob/main/docs/test_cards.pdf)
+   at 100 % (no "fit to page"; the line at the top must be exactly 100 mm) and cut out both
+   cards, on thick paper or card if you have it.
 2. Scan the whole glass three times at 100 dpi, with the lid closed:
 
    ```
@@ -109,4 +110,4 @@ If id2pdf does not find a card or cuts it wrongly, the same three scans are the 
 
 ## Licence
 
-GPL-3.0-or-later, see [LICENSE](LICENSE).
+GPL-3.0-or-later, see [LICENSE](https://github.com/anaisoob/id2pdf/blob/main/LICENSE).

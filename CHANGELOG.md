@@ -5,8 +5,11 @@
 - Cards are found in phone photos too, also at a slant and on a busy background, and
   straightened to their real proportions: `find_card_corners()` and `straighten()`.
   `card_from_image()` uses them when the resolution is not known.
+- A doubtful card in a photo is reported as none rather than cut out wrongly: on MIDV-2020,
+  seven in ten cards are found and under 1 % wrongly.
 - `--images` says when it finds no card in an image instead of silently using the whole image.
 - `tools/evaluate_midv.py` measures card detection on the public MIDV-2020 dataset.
+- `tools/cut_out_cards.py` cuts the card out of every image in a folder, to look through.
 
 ## 0.1.0
 

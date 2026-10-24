@@ -67,14 +67,15 @@ background:
   for the lens of a typical phone camera.
 - The winner lies on edges all round, separates clearly different colours on every side and
   is full of fine print, as a card is and a wall or a door seen through the same lines is not.
-  If even the winner is doubtful, no card is reported rather than a wrong one, and the whole
-  image is used. A scan saved as a file is searched like a scan when this finds nothing.
+  If the winner is doubtful (a low score, or another place in the photo nearly as good), no
+  card is reported rather than a wrong one, and the whole image is used, which is plain to
+  see. A scan saved as a file is searched like a scan when this finds nothing.
 - The card is then straightened to its real proportions, its rounded corners painted white.
 
 On the ID-card photos of [MIDV-2020](https://arxiv.org/abs/2107.00396), a public dataset of mock
-identity documents, 75 % of the cards are found and 4 % wrongly; on a table, in low light or
-with highlights nearly all, on a printed page full of text hardly any. Scans saved as files
-are found 97 % of the time. `tools/evaluate_midv.py` measures this.
+identity documents, 71 % of the cards are found and about 1 % wrongly; on a table, in low
+light or with highlights nearly all, on a printed page full of text hardly any. Scans saved
+as files are found 94 % of the time, never wrongly. `tools/evaluate_midv.py` measures this.
 
 ## Use as a library
 

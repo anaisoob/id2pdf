@@ -13,7 +13,7 @@ DARKER = 15  # grey levels below the lid that count as part of a card (the lid's
 GLASS_EDGE_MM = 2  # strip along the edges of the glass ignored when looking for the card
 
 # Photos and images of unknown resolution. The numbers were tuned on the photos of ID cards in
-# MIDV-2020 (tools/evaluate_midv.py), where seven in ten cards are found and under 1 % wrongly.
+# MIDV-2020 (tools/evaluate_midv.py), where eight in ten cards are found and under 1 % wrongly.
 PHOTO_WIDTH = 800  # the photo is searched at this size
 PHOTO_LINES = 40  # straight lines tried as the card's sides
 PHOTO_SHORTLIST = 60  # outlines whose colours are compared, the best placed on edges first
@@ -23,6 +23,10 @@ PHOTO_MIN_SCORE = 20  # below this, the best outline is doubtful
 PHOTO_MARGIN = 1.6  # and also unless it scores this much more than any other place in the photo
 PHOTO_ENDS = 0.2  # and unless all its sides but one reach their corners on edges at least this much
 PHOTO_PRINT = 0.10  # share of fine edges inside a card from which it counts as fully printed
+# A white card on a printed page or a white keyboard has weak edges among strong ones; its colour
+# does stand out. When nothing is found, the search is repeated with the edges of colour added.
+COLOUR_GAIN = 4  # colour saturation (Lab chroma) times this gives the grey levels searched for edges
+COLOUR_SIDES = 3  # sides of a card found by colour that must be more colourful inside than outside
 LENS = 0.8  # a phone camera's focal length, in widths of the photo
 
 Rect = tuple[tuple[float, float], tuple[float, float], float]  # cv2.minAreaRect: centre, size, angle
@@ -307,22 +311,31 @@ def _in_order(quad: np.ndarray, size: tuple[int, int]) -> np.ndarray:
     return quad if top[0] >= 0 else np.roll(quad, -2, 0)
 
 
-def find_card_corners(image: Image.Image) -> np.ndarray | None:
-    """The four corners of the card in a photo, or in a scan of unknown resolution.
+def _chroma(small: np.ndarray, blur: float) -> np.ndarray:
+    """How colourful each pixel is: its distance from grey in Lab."""
+    lab = cv2.cvtColor(cv2.GaussianBlur(small, (0, 0), blur), cv2.COLOR_RGB2LAB).astype(np.float32)
+    return np.hypot(lab[..., 1] - 128, lab[..., 2] - 128)
 
-    The card can lie at a slant to the camera. Its sides are straight lines through the photo's
-    edges; of all the quadrilaterals they make that have a card's shape, the one whose every
-    side lies on an edge and separates clearly different colours wins; a card is full of fine
-    print, a wall or a door seen through the same lines is not. A light, even image
-    (a scan) whose card is not found that way is searched like a scan. None if there is no card,
-    or the best candidate is doubtful: a low score, another place in the photo nearly as good, or
-    corners where no edges end.
-    Corners clockwise from the card's top left.
-    """
-    scale = PHOTO_WIDTH / max(image.size)
-    small = np.array(image.convert("RGB").resize((round(image.width * scale), round(image.height * scale))))
+
+def _colour_edges(small: np.ndarray) -> np.ndarray:
+    """Where colourful meets grey: a card's outline on a printed page, but not the print."""
+    return cv2.Canny(np.clip(_chroma(small, 2) * COLOUR_GAIN, 0, 255).astype(np.uint8), 30, 80)
+
+
+def _coloured_inside(small: np.ndarray, quad: np.ndarray) -> bool:
+    """Whether all sides but one are more colourful inside than outside; one may touch a hand."""
+    chroma = _chroma(small, 2.5)
+    offset = 0.012 * max(small.shape[:2])
+    inside = [
+        np.median(_at(chroma, points + normal * offset)) > np.median(_at(chroma, points - normal * offset))
+        for points, normal in _sides(quad, 4)
+    ]
+    return sum(inside) >= COLOUR_SIDES
+
+
+def _search(small: np.ndarray, edges: np.ndarray) -> np.ndarray | None:
+    """The card's outline in the photo through these edges, or None if there is none or it is doubtful."""
     size = (small.shape[1], small.shape[0])
-    edges = _edges(small)
     near = cv2.distanceTransform(255 - edges, cv2.DIST_L2, 3) <= 2
     fine = cv2.Canny(cv2.cvtColor(small, cv2.COLOR_RGB2GRAY), 50, 150) > 0
     lab = cv2.cvtColor(cv2.GaussianBlur(small, (0, 0), 2.5), cv2.COLOR_RGB2LAB).astype(np.float32)
@@ -358,11 +371,37 @@ def find_card_corners(image: Image.Image) -> np.ndarray | None:
         # outline around itself, which looks just like a card around its own photo.
         rival = next((other for other, quad in scored[1:] if _overlap(best, quad) < 0.5), 0.0)
         if score >= PHOTO_MARGIN * rival and _ends(best, near) > PHOTO_ENDS:
-            return _in_order(best / scale, image.size)
+            return best
+    return None
+
+
+def find_card_corners(image: Image.Image) -> np.ndarray | None:
+    """The four corners of the card in a photo, or in a scan of unknown resolution.
+
+    The card can lie at a slant to the camera. Its sides are straight lines through the photo's
+    edges; of all the quadrilaterals they make that have a card's shape, the one whose every
+    side lies on an edge and separates clearly different colours wins; a card is full of fine
+    print, a wall or a door seen through the same lines is not. A light, even image
+    (a scan) whose card is not found that way is searched like a scan. Last, the photo is
+    searched again with the edges of colour added, for a coloured card on a grey background
+    whose own edges are lost among stronger ones (print, keys). None if there is no card, or the
+    best candidate is doubtful: a low score, another place in the photo nearly as good, or
+    corners where no edges end.
+    Corners clockwise from the card's top left.
+    """
+    scale = PHOTO_WIDTH / max(image.size)
+    small = np.array(image.convert("RGB").resize((round(image.width * scale), round(image.height * scale))))
+    edges = _edges(small)
+    best = _search(small, edges)
+    if best is not None:
+        return _in_order(best / scale, image.size)
     if _looks_scanned(image):
         cards = find_cards(image, None)
         if cards:
             return _in_order(cv2.boxPoints(cards[0]), image.size)
+    best = _search(small, edges | _colour_edges(small))
+    if best is not None and _coloured_inside(small, best):
+        return _in_order(best / scale, image.size)
     return None
 
 

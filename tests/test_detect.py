@@ -14,6 +14,9 @@ PHOTOS = {
     "photo_hand.jpg": [(78, 342), (521, 348), (543, 620), (95, 643)],
     "photo_slant.jpg": [(99, 614), (608, 601), (559, 810), (133, 832)],
     "photo_dark.jpg": [(63, 493), (517, 422), (563, 714), (103, 778)],
+    # On a printed page and a white keyboard the card is found only by its colour.
+    "photo_page.jpg": [(149, 487), (514, 519), (538, 736), (127, 720)],
+    "photo_keyboard.jpg": [(60, 744), (627, 746), (650, 1124), (42, 1139)],
 }
 
 

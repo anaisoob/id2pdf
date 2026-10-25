@@ -17,3 +17,5 @@ scaled down to 1200 pixels and turned upright; `photo_no_card.jpg` is the top of
 | `photo_hand.jpg` | `est_id/45.jpg` |
 | `photo_slant.jpg` | `fin_id/12.jpg` |
 | `photo_dark.jpg` | `est_id/75.jpg` |
+| `photo_page.jpg` | `esp_id/32.jpg` |
+| `photo_keyboard.jpg` | `fin_id/37.jpg` |

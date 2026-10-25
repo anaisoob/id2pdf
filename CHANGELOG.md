@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- When no card is found in a photo, it is looked for again by its colour: a coloured card on a
+  printed page or a white keyboard, whose edges are lost among the print's. On the MIDV-2020
+  photos 79 % of the cards are found instead of 69 %, still under 1 % wrongly; no card found
+  before is lost.
+
 ## 0.2.1
 
 - Messages in German, French, Italian and Spanish too.

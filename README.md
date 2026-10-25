@@ -75,12 +75,16 @@ background:
   corners where no edges end, as when a side's line runs on past the card), no card is
   reported rather than a wrong one, and the whole image is used, which is plain to see.
   A scan saved as a file is searched like a scan when this finds nothing.
+- Still nothing: the search runs once more with the edges of colour added. On a printed page
+  or a white keyboard a card's own edges are weak among the strong ones of the print or the
+  keys, but a coloured card stands out from the grey. A card found this way has to be more
+  colourful inside than outside on at least three sides; one may touch a hand.
 - The card is then straightened to its real proportions, its rounded corners painted white.
 
 On the ID-card photos of [MIDV-2020](https://arxiv.org/abs/2107.00396), a public dataset of mock
-identity documents, 69 % of the cards are found and under 1 % wrongly; on a table or with
-highlights nearly all, in low light four in five, on a printed page full of text hardly any.
-Scans saved as files are found 94 % of the time, never wrongly. `tools/evaluate_midv.py`
+identity documents, 79 % of the cards are found and under 1 % wrongly; on a table, with
+highlights or in low light nearly all, on a white keyboard two in three, on a printed page full
+of text two in five. Scans saved as files are found 96 % of the time, never wrongly. `tools/evaluate_midv.py`
 measures this.
 
 ## Use as a library

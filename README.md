@@ -13,6 +13,10 @@ Then the same for the back.
 It works with any card of ID-1 size (85.6 × 54 mm): ID cards, driving licences, health
 insurance cards, residence permits. Everything happens on your computer.
 
+id2pdf is a command-line tool. For a small window with buttons instead, use
+[ID Scanner](https://github.com/anaisoob/idscanner): the same card detection, a preview of
+both sides, and image files on Windows and macOS too (`pipx install idscanner`).
+
 ## Install
 
 Linux with a scanner that SANE supports (`scanimage -L` lists it):

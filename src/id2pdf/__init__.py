@@ -9,7 +9,7 @@ from .i18n import set_language
 from .layout import CARD_DPI, IMAGE_SUFFIXES, PAGE_DPI, id_card_page, images_to_pdf, open_image, save_pdf
 from .scanner import ScanError, find_scanner, scan, scan_card_side, scan_id_card, scan_pages
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 __all__ = [
     "CARD_DPI",

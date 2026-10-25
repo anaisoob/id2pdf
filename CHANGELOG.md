@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
 - When no card is found in a photo, it is looked for again by its colour: a coloured card on a
   printed page or a white keyboard, whose edges are lost among the print's. On the MIDV-2020

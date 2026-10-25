@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- Messages in German, French, Italian and Spanish too.
+
 ## 0.2.0
 
 - Cards are found in phone photos too, also at a slant and on a busy background, and

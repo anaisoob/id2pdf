@@ -42,7 +42,7 @@ the output without asking.
 The card's text should be upright on the glass: a slight turn is straightened, but a card upside
 down stays upside down.
 
-Messages are in English or Croatian, following `LANGUAGE` / `LANG`.
+Messages are in English, German, French, Italian, Spanish or Croatian, following `LANGUAGE` / `LANG`.
 
 ## How the card is found
 

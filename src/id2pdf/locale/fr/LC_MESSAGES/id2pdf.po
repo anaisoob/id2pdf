@@ -1,0 +1,210 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: id2pdf\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-25 10:37+0100\n"
+"PO-Revision-Date: 2026-10-25 12:00+0200\n"
+"Last-Translator: anaisoob <anaisoob@tutamail.com>\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/id2pdf/cli.py:18
+msgid ""
+"Scan both sides of an ID card onto one A4 page, as a PDF. The card may lie "
+"anywhere on the scanner glass; it is found, straightened and cut out."
+msgstr ""
+"Numérise les deux faces d'une carte d'identité sur une page A4, en PDF. La "
+"carte peut être posée n'importe où sur la vitre du scanner ; elle est "
+"trouvée, redressée et découpée."
+
+#: src/id2pdf/cli.py:22
+msgid "the PDF to write (with --diagnose: a folder for the scan)"
+msgstr "le PDF à écrire (avec --diagnose : un dossier pour la numérisation)"
+
+#: src/id2pdf/cli.py:29
+msgid "use existing scans or photos of the two sides instead of scanning"
+msgstr ""
+"utiliser des numérisations ou photos existantes des deux faces au lieu de "
+"numériser"
+
+#: src/id2pdf/cli.py:31
+msgid "scan N plain A4 pages instead of a card"
+msgstr "numériser N pages A4 ordinaires au lieu d'une carte"
+
+#: src/id2pdf/cli.py:33
+msgid "scan the glass and print what is found (numbers only)"
+msgstr "numériser la vitre et afficher ce qui est trouvé (chiffres uniquement)"
+
+#: src/id2pdf/cli.py:35
+msgid "SANE device (default: the first scanner in 'scanimage -L')"
+msgstr "périphérique SANE (par défaut : le premier scanner de 'scanimage -L')"
+
+#: src/id2pdf/cli.py:36
+msgid "overwrite the output without asking"
+msgstr "remplacer le fichier de sortie sans demander"
+
+#: src/id2pdf/cli.py:44
+msgid "the output PDF is required"
+msgstr "le PDF de sortie est obligatoire"
+
+#: src/id2pdf/cli.py:46
+#, python-brace-format
+msgid "{path} already exists. Overwrite? [y/N] "
+msgstr "{path} existe déjà. Remplacer ? [o/N] "
+
+#: src/id2pdf/cli.py:47
+msgid "y"
+msgstr "o"
+
+#: src/id2pdf/cli.py:48
+msgid "Nothing was changed."
+msgstr "Rien n'a été modifié."
+
+#: src/id2pdf/cli.py:56
+#, python-brace-format
+msgid "No card found in {path}, the whole image is used."
+msgstr "Aucune carte trouvée dans {path}, l'image entière est utilisée."
+
+#: src/id2pdf/cli.py:61
+#, python-brace-format
+msgid "Scanner: {device}"
+msgstr "Scanner : {device}"
+
+#: src/id2pdf/cli.py:72
+msgid "Cancelled, nothing was saved."
+msgstr "Annulé, rien n'a été enregistré."
+
+#: src/id2pdf/cli.py:73
+#, python-brace-format
+msgid "Saved: {path}"
+msgstr "Enregistré : {path}"
+
+#: src/id2pdf/scanner.py:34
+msgid "The scanimage command is missing (package sane)."
+msgstr "La commande scanimage est absente (paquet sane)."
+
+#: src/id2pdf/scanner.py:36
+msgid "'scanimage -L' failed:"
+msgstr "'scanimage -L' a échoué :"
+
+#: src/id2pdf/scanner.py:40
+msgid "No scanner found. Check 'scanimage -L'."
+msgstr "Aucun scanner trouvé. Vérifiez 'scanimage -L'."
+
+#: src/id2pdf/scanner.py:57
+msgid "The scanner is still busy, trying again..."
+msgstr "Le scanner est encore occupé, nouvel essai..."
+
+#: src/id2pdf/scanner.py:60
+msgid "Scanning failed:"
+msgstr "La numérisation a échoué :"
+
+#: src/id2pdf/scanner.py:65
+msgid "Then press Enter (Ctrl+C to cancel) "
+msgstr "Puis appuyez sur Entrée (Ctrl+C pour annuler) "
+
+#: src/id2pdf/scanner.py:71
+msgid ""
+"Put the card on the glass front side down, anywhere (text upright), and close"
+" the lid."
+msgstr ""
+"Posez la carte face avant contre la vitre, n'importe où (texte droit), et "
+"fermez le capot."
+
+#: src/id2pdf/scanner.py:73
+msgid ""
+"Put the card on the glass back side down, anywhere (text upright), and close "
+"the lid."
+msgstr ""
+"Posez la carte face arrière contre la vitre, n'importe où (texte droit), et "
+"fermez le capot."
+
+#: src/id2pdf/scanner.py:75
+msgid "Looking for the card on the glass..."
+msgstr "Recherche de la carte sur la vitre..."
+
+#: src/id2pdf/scanner.py:80
+msgid ""
+"No card found. Put it away from the edge of the glass, flat, and close the "
+"lid."
+msgstr ""
+"Aucune carte trouvée. Posez-la à plat, loin du bord de la vitre, et fermez le"
+" capot."
+
+#: src/id2pdf/scanner.py:82
+msgid "There is more than one card on the glass, taking the largest."
+msgstr "Il y a plus d'une carte sur la vitre, la plus grande est utilisée."
+
+#: src/id2pdf/scanner.py:91
+msgid "Scanning the card..."
+msgstr "Numérisation de la carte..."
+
+#: src/id2pdf/scanner.py:118
+#, python-brace-format
+msgid "Put page {n} of {pages} face down on the glass and close the lid."
+msgstr "Posez la page {n} sur {pages} face contre la vitre et fermez le capot."
+
+#: src/id2pdf/scanner.py:119
+msgid "Scanning..."
+msgstr "Numérisation..."
+
+#: src/id2pdf/scanner.py:126
+msgid "Put the card on the glass as usual and close the lid."
+msgstr "Posez la carte sur la vitre comme d'habitude et fermez le capot."
+
+#: src/id2pdf/scanner.py:131
+#, python-brace-format
+msgid "Glass: {width:.1f} x {height:.1f} mm, lid (median grey): {lid:.0f}"
+msgstr "Vitre : {width:.1f} x {height:.1f} mm, capot (gris médian) : {lid:.0f}"
+
+#: src/id2pdf/scanner.py:136
+#, python-brace-format
+msgid "Objects found: {count} (largest first; a card is 85.6 x 54 mm)"
+msgstr ""
+"Objets trouvés : {count} (le plus grand d'abord ; une carte mesure 85.6 x 54 "
+"mm)"
+
+#: src/id2pdf/scanner.py:137
+msgid "shape"
+msgstr "forme"
+
+#: src/id2pdf/scanner.py:137
+msgid "size"
+msgstr "taille"
+
+#: src/id2pdf/scanner.py:137
+msgid "too small"
+msgstr "trop petit"
+
+#: src/id2pdf/scanner.py:142
+#, python-brace-format
+msgid "rejected ({reason})"
+msgstr "rejeté ({reason})"
+
+#: src/id2pdf/scanner.py:146
+#, python-brace-format
+msgid "CARD, without its shadow: {size} mm"
+msgstr "CARTE, sans son ombre : {size} mm"
+
+#: src/id2pdf/scanner.py:150
+#, python-brace-format
+msgid ""
+"{long:6.1f} x {short:5.1f} mm  ratio {ratio:4.2f}  centre ({where}) mm  angle"
+" {angle:5.1f}  {verdict}"
+msgstr ""
+"{long:6.1f} x {short:5.1f} mm  rapport {ratio:4.2f}  centre ({where}) mm  "
+"angle {angle:5.1f}  {verdict}"
+
+#: src/id2pdf/scanner.py:157
+#, python-brace-format
+msgid ""
+"The scan is saved only on this computer: {path} (it shows the card, do not "
+"share it)."
+msgstr ""
+"La numérisation est enregistrée uniquement sur cet ordinateur : {path} (elle "
+"montre la carte, ne la partagez pas)."
